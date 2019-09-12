@@ -97,6 +97,14 @@ resource "kubernetes_deployment" "flink_jobmanager" {
             value = "/etc/flink"
           }
 
+          dynamic "env" {
+            for_each = "${var.job_custom_env_variables}"
+            content {
+              name  = env.key
+              value = env.value
+            }
+          }
+
           resources {
             limits {
               cpu    = "1"
