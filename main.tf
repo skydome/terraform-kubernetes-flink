@@ -188,7 +188,7 @@ resource "kubernetes_deployment" "flink_taskmanager" {
         container {
           name        = "taskmanager"
           image       = "${var.image}"
-          command     = ["/bin/bash", "-c", "/opt/flink/bin/taskmanager.sh start; while :; do if [[ -f $(find log -name '*taskmanager*.log' -print -quit) ]]; then tail -f -n +1 log/*taskmanager*.log; fi; done"]
+          command     = ["/bin/bash", "-c", "/opt/flink/bin/taskmanager.sh start; while :; do if [[ -f $(find log -name '*taskmanager*' -print -quit) ]]; then tail -f -n +1 log/*taskmanager*; fi; done"]
           working_dir = "/opt/flink"
 
           port {
