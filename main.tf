@@ -123,13 +123,12 @@ resource "kubernetes_deployment" "flink_jobmanager" {
           }
 
           liveness_probe {
-            http_get {
-              path = "/overview"
-              port = "8081"
+            tcp_socket {
+              port = "6123"
             }
 
             initial_delay_seconds = 30
-            period_seconds        = 10
+            period_seconds        = 5
           }
 
           image_pull_policy = "Always"
@@ -231,6 +230,15 @@ resource "kubernetes_deployment" "flink_taskmanager" {
           volume_mount {
             name       = "${var.job_name}-hadoop-config"
             mount_path = "/etc/hadoop/conf"
+          }
+          
+          liveness_probe {
+            tcp_socket {
+              port = "6122"
+            }
+
+            initial_delay_seconds = 30
+            period_seconds        = 5
           }
 
           image_pull_policy = "Always"
