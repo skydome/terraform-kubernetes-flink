@@ -128,7 +128,7 @@ resource "kubernetes_deployment" "flink_jobmanager" {
             }
 
             initial_delay_seconds = 30
-            period_seconds        = 5
+            period_seconds        = 60
           }
 
           image_pull_policy = "Always"
@@ -238,7 +238,7 @@ resource "kubernetes_deployment" "flink_taskmanager" {
             }
 
             initial_delay_seconds = 30
-            period_seconds        = 5
+            period_seconds        = 60
           }
 
           image_pull_policy = "Always"
