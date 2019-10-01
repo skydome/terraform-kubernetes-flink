@@ -1,6 +1,6 @@
 resource "kubernetes_config_map" "flink_config" {
   metadata {
-    name = "${var.job_name}-flink-config"
+    name      = "${var.job_name}-flink-config"
     namespace = "${var.namespace}"
 
     labels = {
@@ -9,15 +9,15 @@ resource "kubernetes_config_map" "flink_config" {
   }
 
   data = {
-    "flink-conf.yaml" = "blob.server.port: 6124\njobmanager.rpc.address: ${var.job_name}-jobmanager\njobmanager.rpc.port: 6123\njobmanager.heap.size: 1024\ntaskmanager.heap.mb: 1024\ntaskmanager.numberOfTaskSlots: 1\nweb.upload.dir: /opt/flink/lib/jobs"
-    "log4j.properties" = "log4j.rootLogger=INFO, console, file\n\n# Uncomment this if you want to _only_ change Flink's logging\n#log4j.logger.org.apache.flink=INFO\n\n# The following lines keep the log level of common libraries/connectors on\n# log level INFO. The root logger does not override this. You have to manually\n# change the log levels here.\nlog4j.logger.akka=INFO\nlog4j.logger.org.apache.kafka=INFO\nlog4j.logger.org.apache.hadoop=INFO\nlog4j.logger.org.apache.zookeeper=INFO\n\n# Suppress the irrelevant (wrong) warnings from the Netty channel handler\nlog4j.logger.org.jboss.netty.channel.DefaultChannelPipeline=ERROR, console\n\n# Log all infos to the console\nlog4j.appender.console=org.apache.log4j.ConsoleAppender\nlog4j.appender.console.layout=org.apache.log4j.PatternLayout\nlog4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n\n"
+    "flink-conf.yaml"          = "blob.server.port: 6124\njobmanager.rpc.address: ${var.job_name}-jobmanager\njobmanager.rpc.port: 6123\njobmanager.heap.size: 1024\ntaskmanager.heap.mb: 1024\ntaskmanager.numberOfTaskSlots: 1\nweb.upload.dir: /opt/flink/lib/jobs"
+    "log4j.properties"         = "log4j.rootLogger=INFO, console, file\n\n# Uncomment this if you want to _only_ change Flink's logging\n#log4j.logger.org.apache.flink=INFO\n\n# The following lines keep the log level of common libraries/connectors on\n# log level INFO. The root logger does not override this. You have to manually\n# change the log levels here.\nlog4j.logger.akka=INFO\nlog4j.logger.org.apache.kafka=INFO\nlog4j.logger.org.apache.hadoop=INFO\nlog4j.logger.org.apache.zookeeper=INFO\n\n# Suppress the irrelevant (wrong) warnings from the Netty channel handler\nlog4j.logger.org.jboss.netty.channel.DefaultChannelPipeline=ERROR, console\n\n# Log all infos to the console\nlog4j.appender.console=org.apache.log4j.ConsoleAppender\nlog4j.appender.console.layout=org.apache.log4j.PatternLayout\nlog4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n\n"
     "log4j-console.properties" = "log4j.rootLogger=INFO, console, file\n\n# Uncomment this if you want to _only_ change Flink's logging\n#log4j.logger.org.apache.flink=INFO\n\n# The following lines keep the log level of common libraries/connectors on\n# log level INFO. The root logger does not override this. You have to manually\n# change the log levels here.\nlog4j.logger.akka=INFO\nlog4j.logger.org.apache.kafka=INFO\nlog4j.logger.org.apache.hadoop=INFO\nlog4j.logger.org.apache.zookeeper=INFO\n\n# Suppress the irrelevant (wrong) warnings from the Netty channel handler\nlog4j.logger.org.jboss.netty.channel.DefaultChannelPipeline=ERROR, console\n\n# Log all infos to the console\nlog4j.appender.console=org.apache.log4j.ConsoleAppender\nlog4j.appender.console.layout=org.apache.log4j.PatternLayout\nlog4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n\n"
   }
 }
 
 resource "kubernetes_config_map" "flink_hadoop_config" {
   metadata {
-    name = "${var.job_name}-hadoop-config"
+    name      = "${var.job_name}-hadoop-config"
     namespace = "${var.namespace}"
 
     labels = {
@@ -128,7 +128,9 @@ resource "kubernetes_deployment" "flink_jobmanager" {
             }
 
             initial_delay_seconds = 30
-            period_seconds        = 60
+            period_seconds        = 30
+            timeout_seconds       = 5
+            failure_threshold     = 2
           }
 
           image_pull_policy = "Always"
@@ -231,14 +233,16 @@ resource "kubernetes_deployment" "flink_taskmanager" {
             name       = "${var.job_name}-hadoop-config"
             mount_path = "/etc/hadoop/conf"
           }
-          
+
           liveness_probe {
             tcp_socket {
               port = "6122"
             }
 
             initial_delay_seconds = 30
-            period_seconds        = 60
+            period_seconds        = 30
+            timeout_seconds       = 5
+            failure_threshold     = 2
           }
 
           image_pull_policy = "Always"
@@ -254,7 +258,7 @@ resource "kubernetes_deployment" "flink_taskmanager" {
 
 resource "kubernetes_service" "flink_jobmanager" {
   metadata {
-    name = "${var.job_name}-jobmanager"
+    name      = "${var.job_name}-jobmanager"
     namespace = "${var.namespace}"
   }
 
